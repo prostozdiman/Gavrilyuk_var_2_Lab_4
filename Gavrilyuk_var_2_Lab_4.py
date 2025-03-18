@@ -1,113 +1,113 @@
 import random
 import os
 
-class Game:
-    def __init__(self, size=20):
-        self.size = size
-        self.grid = [['.' for _ in range(size)] for _ in range(size)]
-        self.ship = Ship(self)
-        self.planet = Planet(self)
-        self.obstacles = []  # Инициализация пустого списка препятствий
-        self.generate_obstacles()
-        self.running = True
+class Гра:
+    def __init__(self, розмір=20):
+        self.розмір = розмір
+        self.поле = [['.' for _ in range(розмір)] for _ in range(розмір)]
+        self.космічний_корабель = Корабель(self)
+        self.планета = Планета(self)
+        self.перешкоди = []  # Ініціалізація порожнього списку перешкод
+        self.генерувати_перешкоди()
+        self.грає = True
 
-    def generate_obstacles(self):
-        self.obstacles = [Obstacle(self) for _ in range(random.randint(2, 4))]
+    def генерувати_перешкоди(self):
+        self.перешкоди = [Перешкода(self) for _ in range(random.randint(2, 4))]
 
-    def display(self):
-        os.system('cls' if os.name == 'nt' else 'clear')  # Очищаем экран перед каждым ходом
-        for row in self.grid:
-            print(" ".join(row))
+    def відобразити(self):
+        os.system('cls' if os.name == 'nt' else 'clear')  # Очищення екрана перед кожним ходом
+        for рядок in self.поле:
+            print(" ".join(рядок))
 
-    def update_grid(self):
-        self.grid = [['.' for _ in range(self.size)] for _ in range(self.size)]
+    def оновити_поле(self):
+        self.поле = [['.' for _ in range(self.розмір)] for _ in range(self.розмір)]
         
-        self.planet.place_on_grid()
-        for obstacle in self.obstacles:
-            obstacle.place_on_grid()
-        self.ship.place_on_grid()
+        self.планета.розмістити_на_полі()
+        for перешкода in self.перешкоди:
+            перешкода.розмістити_на_полі()
+        self.космічний_корабель.розмістити_на_полі()
 
-    def check_collision(self):
-        ship_x, ship_y = self.ship.position
+    def перевірити_зіткнення(self):
+        x_корабля, y_корабля = self.космічний_корабель.позиція
         
-        # Проверяем столкновение с препятствиями
-        for obstacle in self.obstacles:
-            if obstacle.check_collision(ship_x, ship_y):
+        # Перевіряємо зіткнення з перешкодами
+        for перешкода in self.перешкоди:
+            if перешкода.перевірити_зіткнення(x_корабля, y_корабля):
                 print("\n🚨 Корабель розбився об перешкоду! Гра закінчена. 🚀💥")
-                self.running = False
+                self.грає = False
                 return
         
-        # Проверяем, достигли ли планеты
-        if self.planet.check_landing(ship_x, ship_y):
+        # Перевіряємо, чи досягнуто планети
+        if self.планета.перевірити_приземлення(x_корабля, y_корабля):
             print("\n🎉 Вітаємо! Ви успішно посадили корабель на планету! 🌍🚀")
-            self.running = False
+            self.грає = False
 
-    def run(self):
-        while self.running:
-            self.update_grid()
-            self.display()
-            self.ship.move()
-            self.check_collision()
+    def запустити(self):
+        while self.грає:
+            self.оновити_поле()
+            self.відобразити()
+            self.космічний_корабель.рухатися()
+            self.перевірити_зіткнення()
         print("Гра завершена!")
 
-class Ship:
-    def __init__(self, game):
-        self.game = game
-        self.position = (random.randint(0, game.size - 1), random.randint(0, game.size - 1))
+class Корабель:
+    def __init__(self, гра):
+        self.гра = гра
+        self.позиція = (random.randint(0, гра.розмір - 1), random.randint(0, гра.розмір - 1))
 
-    def place_on_grid(self):
-        x, y = self.position
-        self.game.grid[y][x] = 'S'
+    def розмістити_на_полі(self):
+        x, y = self.позиція
+        self.гра.поле[y][x] = 'S'
 
-    def move(self):
+    def рухатися(self):
         try:
             x, y = map(int, input("\nВведіть координати для руху (x y): ").split())
-            if 0 <= x < self.game.size and 0 <= y < self.game.size:
-                self.position = (x, y)
+            if 0 <= x < self.гра.розмір and 0 <= y < self.гра.розмір:
+                self.позиція = (x, y)
             else:
                 print("❌ Некоректний рух! Введіть координати в межах поля.")
         except ValueError:
             print("❌ Некоректний ввід! Введіть два числа.")
 
-class Planet:
-    def __init__(self, game):
-        self.game = game
-        self.size = random.randint(4, 5)
-        self.x = random.randint(0, game.size - self.size)
-        self.y = random.randint(0, game.size - self.size)
+class Планета:
+    def __init__(self, гра):
+        self.гра = гра
+        self.розмір = random.randint(4, 5)
+        self.x = random.randint(0, гра.розмір - self.розмір)
+        self.y = random.randint(0, гра.розмір - self.розмір)
 
-    def place_on_grid(self):
-        for i in range(self.size):
-            for j in range(self.size):
-                self.game.grid[self.y + i][self.x + j] = 'P'
+    def розмістити_на_полі(self):
+        for i in range(self.розмір):
+            for j in range(self.розмір):
+                self.гра.поле[self.y + i][self.x + j] = 'P'
 
-    def check_landing(self, x, y):
-        return self.x - 1 <= x <= self.x + self.size and self.y - 1 <= y <= self.y + self.size
+    def перевірити_приземлення(self, x, y):
+        return self.x - 1 <= x <= self.x + self.розмір and self.y - 1 <= y <= self.y + self.розмір
 
-class Obstacle:
-    def __init__(self, game):
-        self.game = game
-        self.size = random.randint(1, 3)
+class Перешкода:
+    def __init__(self, гра):
+        self.гра = гра
+        self.розмір = random.randint(1, 3)
         while True:
-            self.x = random.randint(0, game.size - self.size)
-            self.y = random.randint(0, game.size - self.size)
-            if not self._is_too_close_to_other_obstacles():
+            self.x = random.randint(0, гра.розмір - self.розмір)
+            self.y = random.randint(0, гра.розмір - self.розмір)
+            if not self._занадто_близько_до_інших():
                 break
 
-    def _is_too_close_to_other_obstacles(self):
-        for obstacle in self.game.obstacles:
-            if abs(self.x - obstacle.x) < 3 and abs(self.y - obstacle.y) < 3:
+    def _занадто_близько_до_інших(self):
+        for перешкода in self.гра.перешкоди:
+            if abs(self.x - перешкода.x) < 3 and abs(self.y - перешкода.y) < 3:
                 return True
         return False
 
-    def place_on_grid(self):
-        for i in range(self.size):
-            for j in range(self.size):
-                self.game.grid[self.y + i][self.x + j] = 'X'
+    def розмістити_на_полі(self):
+        for i in range(self.розмір):
+            for j in range(self.розмір):
+                self.гра.поле[self.y + i][self.x + j] = 'X'
 
-    def check_collision(self, x, y):
-        return self.x - 1 <= x <= self.x + self.size and self.y - 1 <= y <= self.y + self.size
+    def перевірити_зіткнення(self, x, y):
+        return self.x - 1 <= x <= self.x + self.розмір and self.y - 1 <= y <= self.y + self.розмір
 
 if __name__ == "__main__":
-    game = Game()
-    game.run()
+    гра = Гра()
+    гра.запустити()
